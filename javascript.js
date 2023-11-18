@@ -17,3 +17,11 @@ function divide(a,b) {
     console.log(`${a} / ${b} = ${a/b}`);
     return a/b;
 }
+
+function Calculator() {
+    
+}
+
+function operate(op,a,b) {
+    return op(a,b);
+}
