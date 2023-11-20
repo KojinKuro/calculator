@@ -4,79 +4,26 @@ const calcButtonNode = document.querySelector('.calculator-buttons');
 let inputString = "";
 let decimalDisabled = false;
 
-// //buttons who's inputs get displayed
-// document.querySelectorAll("button.display").forEach((button) => {
-//   button.addEventListener("click", () => {
-//     inputString += button.dataset.display;
-//     calcInputNode.innerText = inputString;
-//   });
-// });
-// //same as above but for functions which have special rules
-// document.querySelectorAll("button.function").forEach((button) => {
-//   button.addEventListener("click", () => {
-//     if (inputString == "") return;
-    
-//     decimalDisabled = false;
-
-//     let lastInput = inputString.slice(-1);
-//     if (isOperation(lastInput)) inputString = inputString.slice(0, -1);
-//     inputString += button.dataset.display;
-//     calcInputNode.innerText = inputString;
-//   });
-// });
-// //handles decimal button
-// document.querySelector("button.decimal").addEventListener("click", () => {
-//   if (decimalDisabled) return;
-
-//   let lastInput = inputString.slice(-1);
-//   if (isOperation(lastInput) || lastInput == "" || lastInput == "=")
-//     inputString += "0";
-//   inputString += document.querySelector("button.decimal").dataset.display;
-//   calcInputNode.innerText = inputString;
-//   decimalDisabled = true;
-// });
-// //equal code
-// document.querySelector("button.equal").addEventListener("click", () => {
-//   calcResultNode.innerText = operateArray(formatInput(inputString));
-// });
-// //clear button
-// document.querySelector("button.clear").addEventListener("click", () => {
-//   inputString = "";
-//   decimalDisabled = false;
-//   calcInputNode.innerText = inputString;
-// });
-// //delete button
-// document.querySelector("button.delete").addEventListener("click", () => {
-//   let lastInput = inputString.slice(-1);
-//   if (lastInput == ".") decimalDisabled = false;
-//   inputString = inputString.slice(0, -1);
-//   calcInputNode.innerText = inputString;
-// });
-
 calcButtonNode.addEventListener("click", (e) => {
   let lastInput = inputString.slice(-1);
   switch(e.target.className) {
-    case 'display':
-      inputString += e.target.dataset.display;
-      calcInputNode.innerText = inputString;
-      break;
     case 'function':
       if (inputString == "") return;
-    
-      decimalDisabled = false;
 
+      decimalDisabled = false;
       if (isOperation(lastInput)) inputString = inputString.slice(0, -1);
       inputString += e.target.dataset.display;
-      calcInputNode.innerText = inputString;
+      break;
+    case 'display':
+      inputString += e.target.dataset.display;
       break;
     case 'decimal':
       if (decimalDisabled) return;
+      decimalDisabled = true;
 
       if (isOperation(lastInput) || lastInput == "" || lastInput == "=")
         inputString += "0";
       inputString += e.target.dataset.display;
-      calcInputNode.innerText = inputString;
-      decimalDisabled = true;
       break;
     case 'equal':
       calcResultNode.innerText = operateArray(formatInput(inputString));
@@ -84,13 +31,13 @@ calcButtonNode.addEventListener("click", (e) => {
     case 'clear':
       inputString = "";
       decimalDisabled = false;
-      calcInputNode.innerText = inputString;
       break;
     case 'delete':
       if (lastInput == ".") decimalDisabled = false;
       inputString = inputString.slice(0, -1);
-      calcInputNode.innerText = inputString;
   }
+
+  if (e.target.className != 'equal') calcInputNode.innerText = inputString;
 });
 
 function add(a, b) {
@@ -147,17 +94,17 @@ function convertToOp(str) {
 function formatInput(str) {
   let strArray = str.split("");
   let data = [];
-  let curInput = "";
+  let curNum = "";
 
   while (strArray.length) {
-    let strFirst = strArray.shift();
-    if (isNumeric(`${curInput}${strFirst}`)) {
-      curInput += strFirst;
-      if (!strArray.length) data.push(convertToNum(curInput));
+    let firstStrVal = strArray.shift();
+    if (isNumeric(`${curNum}${firstStrVal}`)) {
+      curNum += firstStrVal;
+      if (!strArray.length) data.push(convertToNum(curNum));
     } else {
-      data.push(convertToNum(curInput));
-      curInput = "";
-      data.push(convertToOp(strFirst));
+      data.push(convertToNum(curNum));
+      data.push(convertToOp(firstStrVal));
+      curNum = "";
     }
   }
 
