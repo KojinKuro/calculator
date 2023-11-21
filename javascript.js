@@ -41,8 +41,8 @@ calcButtonNode.addEventListener("click", (e) => {
       break;
     case "equal":
       if (equalMode) {
-        let fArray = formatInput(inputString);
-        inputString += `${fArray[fArray.length - 2]}${fArray[fArray.length - 1]}`;
+        let fArr = formatInput(inputString);
+        inputString += `${fArr[fArr.length - 2]}${fArr[fArr.length - 1]}`;
       }
 
       equalMode = true;
@@ -128,16 +128,8 @@ function formatInput(str) {
     }
   }
 
-  if (data.length % 2 == 0) {
-    if (data[data.length - 1] == add || data[data.length - 1] == subtract)
-      data.push(0);
-    else if (
-      data[data.length - 1] == multiply ||
-      data[data.length - 1] == divide
-    )
-      data.push(1);
-  }
-
+  if (data.length % 2 == 0)
+    data.pop();  
   return data;
 }
 
