@@ -2,7 +2,7 @@
 *The Odin Project - Calculator Project*
 
 ## Description
-This is a basic calculator that adds, subtracts, multiplies, and divides a users input. This can be imputed through a keyboard or the user interface that was created. The user interface is inspired by the aesthetics of the science fiction genre.
+This is a basic calculator that adds, subtracts, multiplies, and divides a users input. This can be inputted through a keyboard or the user interface that was created. The user interface is inspired by the aesthetics of the science fiction genre.
 
 The technologies used are HTML, Javascript, and CSS. This was because the goal of the project was to practice using everything that I learned in the Odin Project Fundamentals section.
 
