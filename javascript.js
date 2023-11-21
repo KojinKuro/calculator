@@ -128,8 +128,7 @@ function formatInput(str) {
     }
   }
 
-  if (data.length % 2 == 0)
-    data.pop();  
+  if (data.length % 2 == 0) data.pop();
   return data;
 }
 
