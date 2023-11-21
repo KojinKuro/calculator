@@ -1,43 +1,63 @@
 const calcInputNode = document.querySelector(".calculator-input");
 const calcResultNode = document.querySelector(".calculator-result");
-const calcButtonNode = document.querySelector('.calculator-buttons');
+const calcButtonNode = document.querySelector(".calculator-buttons");
 let inputString = "";
 let decimalDisabled = false;
+let equalMode = false;
 
 calcButtonNode.addEventListener("click", (e) => {
   let lastInput = inputString.slice(-1);
-  switch(e.target.className) {
-    case 'function':
+  switch (e.target.className) {
+    case "function":
       if (inputString == "") return;
+      if (equalMode) {
+        equalMode = false;
+        inputString = calcResultNode.innerText;
+      }
 
       decimalDisabled = false;
       if (isOperation(lastInput)) inputString = inputString.slice(0, -1);
       inputString += e.target.dataset.display;
       break;
-    case 'display':
+    case "display":
+      if (equalMode) {
+        equalMode = decimalDisabled = false;
+        inputString = "";
+      }
       inputString += e.target.dataset.display;
       break;
-    case 'decimal':
+    case "decimal":
       if (decimalDisabled) return;
       decimalDisabled = true;
+
+      if (equalMode) {
+        equalMode = false;
+        inputString = "";
+      }
 
       if (isOperation(lastInput) || lastInput == "" || lastInput == "=")
         inputString += "0";
       inputString += e.target.dataset.display;
       break;
-    case 'equal':
+    case "equal":
+      if (equalMode) {
+        let fArray = formatInput(inputString);
+        inputString += `${fArray[fArray.length - 2]}${fArray[fArray.length - 1]}`;
+      }
+
+      equalMode = true;
       calcResultNode.innerText = operateArray(formatInput(inputString));
       break;
-    case 'clear':
+    case "clear":
       inputString = "";
-      decimalDisabled = false;
+      equalMode = decimalDisabled = false;
       break;
-    case 'delete':
+    case "delete":
       if (lastInput == ".") decimalDisabled = false;
+      equalMode = false;
       inputString = inputString.slice(0, -1);
   }
-
-  if (e.target.className != 'equal') calcInputNode.innerText = inputString;
+  calcInputNode.innerText = inputString;
 });
 
 function add(a, b) {
@@ -103,7 +123,7 @@ function formatInput(str) {
       if (!strArray.length) data.push(convertToNum(curNum));
     } else {
       data.push(convertToNum(curNum));
-      data.push(convertToOp(firstStrVal));
+      data.push(firstStrVal);
       curNum = "";
     }
   }
@@ -122,10 +142,13 @@ function formatInput(str) {
 }
 
 function operateArray(arr) {
+  console.log(`Beginning to compute.`);
   if (!arr.length) return 0;
 
   let arrCopy = arr;
   while (arr.length >= 3)
-    arrCopy.unshift(operate(arrCopy.shift(), arrCopy.shift(), arrCopy.shift()));
+    arrCopy.unshift(
+      operate(arrCopy.shift(), convertToOp(arrCopy.shift()), arrCopy.shift())
+    );
   return arrCopy.shift();
 }
