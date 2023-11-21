@@ -4,90 +4,184 @@ const calcButtonNode = document.querySelector(".calculator-buttons");
 const lightDNode = document.getElementById("light-decimal");
 const lightENode = document.getElementById("light-equal");
 
-let inputString = "";
-let decimalDisabled = false;
-let equalMode = false;
+let inputHandler = {
+  inputString: "",
+  decimalDisabled: false,
+  equalMode: false,
+  number: (number) => {
+    if (inputHandler.equalMode) {
+      inputHandler.equalMode = inputHandler.decimalDisabled = false;
+      inputHandler.inputString = "";
+    }
+    inputHandler.inputString += number;
+    calcInputNode.innerText = inputHandler.inputString;
+  },
+  decimal: () => {
+    if (inputHandler.decimalDisabled) return;
+    inputHandler.decimalDisabled = true;
 
-window.addEventListener('light_update', () => {
-  switch(decimalDisabled) {
+    if (inputHandler.equalMode) {
+      inputHandler.equalMode = false;
+      inputHandler.inputString = "";
+    }
+
+    if ( isOperation(getLastInput()) || getLastInput() == "" || getLastInput() == "=" )
+      inputHandler.inputString += "0";
+    inputHandler.inputString += ".";
+    calcInputNode.innerText = inputHandler.inputString;
+  },
+  operation: (symbol) => {
+    if (inputHandler.inputString == "") return;
+    if (inputHandler.equalMode) {
+      inputHandler.equalMode = false;
+      inputHandler.inputString = calcResultNode.innerText;
+    }
+
+    inputHandler.decimalDisabled = false;
+    if (isOperation(getLastInput()))
+      inputHandler.inputString = inputHandler.inputString.slice(0, -1);
+    inputHandler.inputString += symbol;
+    calcInputNode.innerText = inputHandler.inputString;
+  },
+  equal: () => {
+    if (inputHandler.equalMode) {
+      let fArr = formatInput(inputHandler.inputString);
+      if (fArr.length >= 3)
+        inputHandler.inputString += `${fArr[fArr.length - 2]}${
+          fArr[fArr.length - 1]
+        }`;
+    }
+
+    inputHandler.equalMode = true;
+    calcResultNode.innerText = operateArray(
+      formatInput(inputHandler.inputString)
+    );
+    calcInputNode.innerText = inputHandler.inputString;
+  },
+  clear: () => {
+    inputHandler.inputString = calcResultNode.innerText = "";
+    inputHandler.equalMode = inputHandler.decimalDisabled = false;
+    calcInputNode.innerText = inputHandler.inputString;
+  },
+  delete: () => {
+    if (getLastInput() == ".") inputHandler.decimalDisabled = false;
+    inputHandler.equalMode = false;
+    inputHandler.inputString = inputHandler.inputString.slice(0, -1);
+    calcInputNode.innerText = inputHandler.inputString;
+  },
+};
+
+function getLastInput() {
+  return inputHandler.inputString.slice(-1);
+}
+
+window.addEventListener("light_update", () => {
+  switch (inputHandler.decimalDisabled) {
     case true:
-      lightDNode.classList.add('glow');
+      lightDNode.classList.add("glow");
       break;
     case false:
-      lightDNode.classList.remove('glow');
+      lightDNode.classList.remove("glow");
       break;
   }
-  switch(equalMode) {
+  switch (inputHandler.equalMode) {
     case true:
-      lightENode.classList.add('glow');
+      lightENode.classList.add("glow");
       break;
     case false:
-      lightENode.classList.remove('glow');
+      lightENode.classList.remove("glow");
       break;
   }
 });
 
 calcButtonNode.addEventListener("click", (e) => {
   switch (e.target.className) {
-    case "function":
-      if (inputString == "") return;
-      if (equalMode) {
-        equalMode = false;
-        inputString = calcResultNode.innerText;
-      }
-
-      decimalDisabled = false;
-      if (isOperation(getLastInput())) inputString = inputString.slice(0, -1);
-      inputString += e.target.dataset.display;
+    case "operation":
+      inputHandler.operation(e.target.dataset.display);
       break;
-    case "display":
-      if (equalMode) {
-        equalMode = decimalDisabled = false;
-        inputString = "";
-      }
-      inputString += e.target.dataset.display;
+    case "number":
+      inputHandler.number(e.target.dataset.display);
       break;
     case "decimal":
-      if (decimalDisabled) return;
-      decimalDisabled = true;
-
-      if (equalMode) {
-        equalMode = false;
-        inputString = "";
-      }
-
-      if (isOperation(getLastInput()) || getLastInput() == "" || getLastInput() == "=")
-        inputString += "0";
-      inputString += e.target.dataset.display;
+      inputHandler.decimal();
       break;
     case "equal":
-      if (equalMode) {
-        let fArr = formatInput(inputString);
-        if (fArr.length >= 3)
-          inputString += `${fArr[fArr.length - 2]}${fArr[fArr.length - 1]}`;
-      }
-
-      equalMode = true;
-      calcResultNode.innerText = operateArray(formatInput(inputString));
+      inputHandler.equal();
       break;
     case "clear":
-      inputString = calcResultNode.innerText = "";
-      equalMode = decimalDisabled = false;
+      inputHandler.clear();
       break;
     case "delete":
-      if (getLastInput() == ".") decimalDisabled = false;
-      equalMode = false;
-      inputString = inputString.slice(0, -1);
+      inputHandler.delete();
+      break;
   }
-  calcInputNode.innerText = inputString;
 
-  const lightEvent = new Event('light_update');
+  const lightEvent = new Event("light_update");
   window.dispatchEvent(lightEvent);
 });
 
-function getLastInput() {
-  return inputString.slice(-1);
-}
+window.addEventListener("keyup", (e) => {
+  e.preventDefault();
+  switch (e.code) {
+    case "Digit1":
+      inputHandler.number("1");
+      break;
+    case "Digit2":
+      inputHandler.number("2");
+      break;
+    case "Digit3":
+      inputHandler.number("3");
+      break;
+    case "Digit4":
+      inputHandler.number("4");
+      break;
+    case "Digit5":
+      inputHandler.number("5");
+      break;
+    case "Digit6":
+      inputHandler.number("6");
+      break;
+    case "Digit7":
+      inputHandler.number("7");
+      break;
+    case "Digit8":
+      if (e.shiftKey) { inputHandler.operation("x"); }
+      else { inputHandler.number("8"); }
+      break;
+    case "Digit9":
+      inputHandler.number("9");
+      break;
+    case "Digit0":
+      inputHandler.number("0");
+      break;
+    case "Minus":
+      inputHandler.operation("-");
+      break;
+    case "Enter":
+    case "Equal":
+      if (e.shiftKey) { inputHandler.operation("+"); }
+      else { inputHandler.equal(); }
+      break;
+    case "Slash":
+      inputHandler.operation("/");
+      break;
+    case "Period":
+      inputHandler.decimal();
+      break;
+    case "KeyX":
+      inputHandler.operation('x');
+      break;
+    case "Escape":
+      inputHandler.clear();
+      break;
+    case "Backspace":
+      inputHandler.delete();
+      break;
+  }
+
+  const lightEvent = new Event("light_update");
+  window.dispatchEvent(lightEvent);
+});
 
 function add(a, b) {
   console.log(`${a} + ${b} = ${a + b}`);
@@ -157,7 +251,10 @@ function formatInput(str) {
     }
   }
 
-  if (data.length % 2 == 0) data.pop();
+  if (data.length % 2 == 0) { 
+    data.pop();
+    inputHandler.inputString = inputHandler.inputString.slice(0,-1);
+  };
   return data;
 }
 
